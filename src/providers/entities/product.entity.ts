@@ -4,29 +4,38 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  ManyToOne,
 } from 'typeorm';
 
-interface SchemaProvider {
+import { Provider } from '../entities/provider.entity';
+
+interface SchemaProduct {
   id: number;
   name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  price: number;
+  provider: Provider;
 }
-import { Product } from '../entities/product.entity';
+
 @Entity()
-export class Provider implements SchemaProvider {
+export class Product implements SchemaProduct {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
     type: 'varchar',
     length: 150,
+    nullable: false,
   })
   name: string;
 
-  @OneToMany(() => Product, (product) => product.provider)
-  products: Product[];
+  @Column({
+    type: 'integer',
+    nullable: false,
+  })
+  price: number;
+
+  @ManyToOne(() => Provider, (provider) => provider.products)
+  provider: Provider;
 
   @CreateDateColumn({
     type: 'timestamptz',

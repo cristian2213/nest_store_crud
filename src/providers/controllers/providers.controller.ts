@@ -23,16 +23,22 @@ export class ProvidersController {
     return this.providersService.findAll();
   }
 
-  @Get(':id')
+  @Get('products')
   @HttpCode(HttpStatus.ACCEPTED)
-  getProvider(@Param('id', ParseIntPipe) id: number) {
-    return this.providersService.findOne(id);
+  getProvidersWithProducts() {
+    return this.providersService.getProvidersWithProducts();
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() payload: CreateProviderDto) {
     return this.providersService.create(payload);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.ACCEPTED)
+  getProvider(@Param('id', ParseIntPipe) id: number) {
+    return this.providersService.findOne(id);
   }
 
   @Put(':id')
@@ -48,5 +54,11 @@ export class ProvidersController {
   @HttpCode(HttpStatus.ACCEPTED)
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.providersService.delete(id);
+  }
+
+  @Get(':id/products')
+  @HttpCode(HttpStatus.ACCEPTED)
+  getProductsByProvider(@Param('id', ParseIntPipe) id: number) {
+    return this.providersService.getProductsByProvider(id);
   }
 }
