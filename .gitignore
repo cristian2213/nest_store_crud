@@ -35,3 +35,8 @@ lerna-debug.log*
 
 # DB folder
 /postgres_data
+
+# environment config
+.env
+.prod.env
+.stag.env
