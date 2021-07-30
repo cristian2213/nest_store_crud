@@ -18,13 +18,13 @@ export class ProvidersController {
   constructor(private providersService: ProvidersService) {}
 
   @Get()
-  @HttpCode(HttpStatus.ACCEPTED)
+  @HttpCode(HttpStatus.OK)
   getProviders() {
     return this.providersService.findAll();
   }
 
   @Get('products')
-  @HttpCode(HttpStatus.ACCEPTED)
+  @HttpCode(HttpStatus.OK)
   getProvidersWithProducts() {
     return this.providersService.getProvidersWithProducts();
   }
@@ -36,7 +36,7 @@ export class ProvidersController {
   }
 
   @Get(':id')
-  @HttpCode(HttpStatus.ACCEPTED)
+  @HttpCode(HttpStatus.OK)
   getProvider(@Param('id', ParseIntPipe) id: number) {
     return this.providersService.findOne(id);
   }
