@@ -40,6 +40,7 @@ export class ProductsService {
     payload: UpdateProductDto,
   ): Promise<Product> | never {
     const product = await this.productRepo.findOne(id);
+
     if (!product || Object.values(product).length < 1)
       throw new NotFoundException(`Product #${id} doesn't exist`);
 
