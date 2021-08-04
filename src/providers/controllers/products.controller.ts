@@ -8,11 +8,18 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Delete,
+  UseGuards,
 } from '@nestjs/common';
+// import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { CreateProductDto, UpdateProductDto } from '../dtos/products.dtos';
 import { ProductsService } from '../services/products.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { Public } from '../../auth/decorators/public.decorator';
 
+// @UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
@@ -26,6 +33,7 @@ export class ProductsController {
     status: 200,
     isArray: true,
   })
+  @Public() // custom decorator
   @Get()
   @HttpCode(HttpStatus.OK)
   getProducts() {
@@ -92,6 +100,7 @@ export class ProductsController {
     required: true,
     description: 'product id',
   })
+  @Public()
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   getProduct(@Param('id', ParseIntPipe) id: number) {
@@ -118,5 +127,24 @@ export class ProductsController {
     @Body() payload: UpdateProductDto,
   ) {
     return this.productsService.update(id, payload);
+  }
+
+  @ApiOperation({
+    summary: 'delete a product',
+    description: 'Delete a product and it return it',
+  })
+  @ApiResponse({
+    status: 200,
+    isArray: false,
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'product id',
+  })
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  deleteProduct(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.delete(id);
   }
 }
