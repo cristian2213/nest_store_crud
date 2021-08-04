@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { enviroments } from './enviroments';
 import { ProviderModule } from './providers/provider.module';
 import { UserModule } from './users/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -36,11 +37,15 @@ import { UserModule } from './users/user.module';
         TYPEORM_MIGRATIONS: Joi.required(),
         TYPEORM_MIGRATIONS_DIR: Joi.required(),
         TYPEORM_MIGRATIONS_TABLE_NAME: Joi.required(),
+
+        // jwt
+        API_KEY: Joi.string().required(),
       }),
     }),
     DatabaseModule,
     ProviderModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

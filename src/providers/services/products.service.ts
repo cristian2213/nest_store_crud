@@ -63,4 +63,14 @@ export class ProductsService {
     if (!product) throw new NotFoundException(`Product #${id} doesn't exist`);
     return product;
   }
+
+  async delete(id: number) {
+    const product = await this.find(id);
+    if (!product) throw new NotFoundException(`Product #${id} doesn't exist`);
+    await this.productRepo.delete(product.id);
+    return {
+      response: `Product #${id} was deleted`,
+      status: HttpStatus.OK,
+    };
+  }
 }
