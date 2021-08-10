@@ -16,10 +16,17 @@ export const createUserStub = (payload: CreateUserDto): User => {
 export const findOneStub = (data: any): User | boolean => {
   const users = [userStub()];
   let user: User;
-  if (data.id) {
-    user = users.find((item) => item.id === data.id);
+  if (typeof data === 'number') {
+    user = users.find((item) => item.id === data);
     return user;
   }
   user = users.find((item) => item.email === data.where.email);
   return user ? user : false;
+};
+
+export const deleteUserStub = (id: number) => {
+  return {
+    response: `User #${id} was deleted`,
+    status: 200,
+  };
 };
