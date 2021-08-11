@@ -18,7 +18,7 @@ export class UsersService {
 
   async findAll(): Promise<User[]> | never {
     const users = await this.usersRepository.find();
-    if (users.length < 1) {
+    if (!users) {
       throw new HttpException('No Content', HttpStatus.NO_CONTENT);
     }
 

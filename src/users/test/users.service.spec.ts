@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../dtos/users.dtos';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
+import { mutationState } from '../stubs/user.repository.stub';
 import { userStub } from '../stubs/user.stub';
 import { mockUsersRepository } from '../__mocksRepositories__/users.service.repository';
 
@@ -30,8 +31,11 @@ describe('UsersService', () => {
   describe('findAll', () => {
     describe('when findAll is called', () => {
       let users: User[];
+      let usersArray: User[];
+
       beforeEach(async () => {
         users = await usersService.findAll();
+        usersArray = [userStub()];
       });
 
       test('then it should call repository find method', () => {
@@ -40,6 +44,20 @@ describe('UsersService', () => {
 
       test('then it should return the array of users', () => {
         expect(Array.isArray(users)).toBe(true);
+        expect(users).toEqual(usersArray);
+      });
+
+      test('then it should return a HttpException if the users do not exist', async () => {
+        await mutationState('err', true);
+
+        setTimeout(async () => {
+          try {
+            await usersService.findAll();
+          } catch (error) {
+            expect(error).toBeInstanceOf(HttpException);
+            expect(error.message).toBe('No Content');
+          }
+        }, 200);
       });
     });
   });

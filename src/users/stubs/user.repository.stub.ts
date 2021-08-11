@@ -2,7 +2,18 @@ import { CreateUserDto } from '../dtos/users.dtos';
 import { User } from '../entities/user.entity';
 import { userStub } from './user.stub';
 
+// eslint-disable-next-line prefer-const
+export let state = {
+  err: false,
+};
+
+export const mutationState = (key: string, value: boolean) => {
+  const result = (state[key] = value);
+  return result;
+};
+
 export const usersStub = (): User[] => {
+  if (state.err) return [];
   return [userStub()];
 };
 
