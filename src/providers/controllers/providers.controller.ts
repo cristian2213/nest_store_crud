@@ -9,90 +9,62 @@ import {
   ParseIntPipe,
   HttpStatus,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ProvidersService } from '../services/providers.service';
-import { CreateProviderDto, UpdateProviderDto } from '../dtos/providers.dtos';
+import {
+  CreateProviderDto,
+  UpdateProviderDto,
+  ProviderNotFoundResponse,
+} from '../dtos/providers.dtos';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
+@ApiBearerAuth()
 @ApiTags('providers')
+@UseGuards(JwtAuthGuard)
 @Controller('providers')
 export class ProvidersController {
   constructor(private providersService: ProvidersService) {}
 
-  @ApiOperation({
-    summary: 'get all providers',
-    description: 'Return a list with all products',
-  })
-  @ApiResponse({
-    status: 200,
-    isArray: true,
-  })
+  @ApiOperation({ summary: 'get all providers' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'No Content' })
   @Get()
   @HttpCode(HttpStatus.OK)
   getProviders() {
     return this.providersService.findAll();
   }
 
-  @ApiOperation({
-    summary: 'get all providers with their products',
-    description: 'Return a list with all providers with their products',
-  })
-  @ApiResponse({
-    status: 200,
-    isArray: true,
-  })
-  @Get('products')
-  @HttpCode(HttpStatus.OK)
-  getProvidersWithProducts() {
-    return this.providersService.getProvidersWithProducts();
-  }
-
-  @ApiOperation({
-    summary: 'create a provider',
-    description: 'Create a provider and it return it',
-  })
-  @ApiResponse({
-    status: 201,
-    isArray: true,
-  })
+  @ApiOperation({ summary: 'create a provider' })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() payload: CreateProviderDto) {
     return this.providersService.create(payload);
   }
 
-  @ApiOperation({
-    summary: 'get only a provider',
-    description: 'Return a provider',
-  })
-  @ApiResponse({
-    status: 200,
-    isArray: false,
-  })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'provider id',
-  })
-  @Get(':id')
+  @ApiOperation({ summary: 'get all providers with their products' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'No Content' })
+  @Get('products')
   @HttpCode(HttpStatus.OK)
+  getProvidersWithProducts() {
+    return this.providersService.getProvidersWithProducts();
+  }
+
+  @ApiOperation({ summary: 'get only a provider' })
+  @ApiResponse({ type: ProviderNotFoundResponse, status: 404 })
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
   getProvider(@Param('id', ParseIntPipe) id: number) {
     return this.providersService.findOne(id);
   }
 
-  @ApiOperation({
-    summary: 'update a provider',
-    description: 'Update a provider and it return it',
-  })
-  @ApiResponse({
-    status: 202,
-    isArray: false,
-  })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'provider id',
-  })
+  @ApiOperation({ summary: 'update a provider' })
+  @ApiResponse({ type: ProviderNotFoundResponse, status: 404 })
   @Put(':id')
   @HttpCode(HttpStatus.ACCEPTED)
   update(
@@ -102,38 +74,16 @@ export class ProvidersController {
     return this.providersService.update(id, payload);
   }
 
-  @ApiOperation({
-    summary: 'delete a provider',
-    description: 'Delete a provider and it return it',
-  })
-  @ApiResponse({
-    status: 202,
-    isArray: false,
-  })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'provider id',
-  })
+  @ApiOperation({ summary: 'delete a provider' })
+  @ApiResponse({ type: ProviderNotFoundResponse, status: 404 })
   @Delete(':id')
   @HttpCode(HttpStatus.ACCEPTED)
   delete(@Param('id', ParseIntPipe) id: number) {
     return this.providersService.delete(id);
   }
 
-  @ApiOperation({
-    summary: 'get product by provider',
-    description: 'Return a provider with all its products',
-  })
-  @ApiResponse({
-    status: 200,
-    isArray: true,
-  })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'provider id',
-  })
+  @ApiOperation({ summary: 'get product by provider' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'No Content' })
   @Get(':id/products')
   @HttpCode(HttpStatus.OK)
   getProductsByProvider(@Param('id', ParseIntPipe) id: number) {

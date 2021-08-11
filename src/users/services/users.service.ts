@@ -7,7 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, UpdateUserDto } from '../dtos/users.dtos';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UserToDeleteResponse,
+} from '../dtos/users.dtos';
 import { User } from '../entities/user.entity';
 
 @Injectable()
@@ -29,7 +33,7 @@ export class UsersService {
     if (user) {
       throw new HttpException(
         'The user has an associated account',
-        HttpStatus.NOT_ACCEPTABLE,
+        HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
 
@@ -41,7 +45,7 @@ export class UsersService {
   async update(id: number, payload: UpdateUserDto): Promise<User> | never {
     const userToUpdate: User = await this.findUser(id);
     if (!userToUpdate) {
-      throw new NotFoundException("The user to update doesn't exist");
+      throw new NotFoundException(`User #${id} doesn't exist`);
     }
     if (payload.password) {
       payload.password = await bcrypt.hash(payload.password, 10);
@@ -58,14 +62,13 @@ export class UsersService {
 
   async findUser(id: number): Promise<User> | never {
     const user = await this.userRepo.findOne(id);
-    if (!user)
-      throw new NotFoundException("The user to research doesn't exist");
+    if (!user) throw new NotFoundException(`User #${id} doesn't exist`);
     return user;
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<UserToDeleteResponse> {
     const user = await this.findUser(id);
-    if (!user) throw new NotFoundException("The user to delete doesn't exist");
+    if (!user) throw new NotFoundException(`User #${id} doesn't exist`);
 
     await this.userRepo.delete(user.id);
     return {

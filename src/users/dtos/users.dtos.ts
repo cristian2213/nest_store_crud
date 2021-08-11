@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -31,3 +37,57 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}
+export class UserNotFoundResponse {
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+    example: 404,
+  })
+  readonly statusCode: number;
+
+  @IsString()
+  @ApiProperty({
+    type: String,
+    example: "User #1 doesn't exist",
+  })
+  readonly message: string;
+
+  @IsString()
+  @ApiProperty({
+    type: String,
+    example: 'Not Found',
+  })
+  readonly error: string;
+}
+
+export class UserToDeleteResponse {
+  @IsString()
+  @ApiProperty({
+    type: String,
+    example: 'User #1 was deleted',
+  })
+  readonly response: string;
+
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+    example: 200,
+  })
+  readonly status: number;
+}
+
+export class UserToCreateErrorResponse {
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+    example: 422,
+  })
+  readonly statusCode: number;
+
+  @IsString()
+  @ApiProperty({
+    type: String,
+    example: 'The user has an associated account',
+  })
+  readonly message: string;
+}

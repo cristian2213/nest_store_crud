@@ -6,7 +6,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateProductDto, UpdateProductDto } from '../dtos/products.dtos';
+import {
+  CreateProductDto,
+  ProductToDeleteResponse,
+  UpdateProductDto,
+} from '../dtos/products.dtos';
 import { Product } from '../entities/product.entity';
 
 @Injectable()
@@ -64,7 +68,7 @@ export class ProductsService {
     return product;
   }
 
-  async delete(id: number) {
+  async delete(id: number): Promise<ProductToDeleteResponse> {
     const product = await this.find(id);
     if (!product) throw new NotFoundException(`Product #${id} doesn't exist`);
     await this.productRepo.delete(product.id);
