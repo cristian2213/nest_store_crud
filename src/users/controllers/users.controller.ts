@@ -9,66 +9,66 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
-  ApiNoContentResponse,
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { UsersService } from '../services/users.service';
-import { CreateUserDto, UpdateUserDto } from '../dtos/users.dtos';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UserNotFoundResponse,
+  UserToCreateErrorResponse,
+} from '../dtos/users.dtos';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @ApiTags('users')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private userService: UsersService) {}
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'get all users' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'No Content' })
   @Get()
-  @ApiOperation({
-    summary: 'get all users',
-    description: 'Return a list with all users',
-  })
-  @ApiResponse({ status: 200, description: 'Return all records' })
-  @ApiNoContentResponse({ status: 204, description: 'No Content' })
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.ACCEPTED)
   getUsers() {
     return this.userService.findAll();
   }
 
-  @ApiOperation({
-    summary: 'get only an user',
-    description: 'Return an user',
-  })
-  @ApiResponse({ status: 200, description: 'Return an user' })
-  @ApiResponse({ status: 404, description: 'No found' })
-  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'get only an user' })
+  @ApiResponse({ type: UserNotFoundResponse, status: 404 })
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   getUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findUser(id);
   }
 
-  @ApiOperation({
-    summary: 'create an user',
-    description: 'Return the user created',
+  @Public()
+  @ApiOperation({ summary: 'create an user' })
+  @ApiResponse({
+    type: UserToCreateErrorResponse,
+    status: HttpStatus.UNPROCESSABLE_ENTITY,
   })
-  @ApiResponse({ status: 200, description: 'Return an user' })
-  @ApiResponse({ status: 406, description: 'No Acceptable' })
-  @HttpCode(HttpStatus.OK)
   @Post()
+  @HttpCode(HttpStatus.OK)
   createUser(@Body() payload: CreateUserDto) {
     return this.userService.create(payload);
   }
 
-  @ApiOperation({
-    summary: 'update an user',
-    description: 'Update an user by id and return it',
-  })
-  @ApiResponse({ status: 200, description: 'User Updated' })
-  @ApiResponse({ status: 404, description: 'No found' })
-  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'update an user' })
+  @ApiResponse({ type: UserNotFoundResponse, status: 404 })
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateUserDto,
@@ -76,14 +76,11 @@ export class UsersController {
     return this.userService.update(id, payload);
   }
 
-  @ApiOperation({
-    summary: 'Delete an user',
-    description: 'Delete an user by id and return it',
-  })
-  @ApiResponse({ status: 202, description: 'User deleted' })
-  @ApiResponse({ status: 404, description: 'No found' })
-  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an user' })
+  @ApiResponse({ type: UserNotFoundResponse, status: 404 })
   @Delete(':id')
+  @HttpCode(HttpStatus.ACCEPTED)
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.delete(id);
   }

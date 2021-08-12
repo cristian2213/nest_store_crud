@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
 
 export class CreateProviderDto {
@@ -17,3 +17,26 @@ export class CreateProviderDto {
 }
 
 export class UpdateProviderDto extends PartialType(CreateProviderDto) {}
+
+export class ProviderNotFoundResponse {
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+    example: 404,
+  })
+  readonly statusCode: number;
+
+  @IsString()
+  @ApiProperty({
+    type: String,
+    example: "Provider #1 doesn't exist",
+  })
+  readonly message: string;
+
+  @IsString()
+  @ApiProperty({
+    type: String,
+    example: 'Not Found',
+  })
+  readonly error: string;
+}
