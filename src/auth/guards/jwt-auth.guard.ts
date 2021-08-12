@@ -19,7 +19,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       IS_PUBLIC_KEY,
       context.getHandler(),
     );
-
     if (checkPlubicRequest) return true;
     return super.canActivate(context);
   }

@@ -12,11 +12,13 @@ import { User } from '../entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private usersRepository: Repository<User>,
+  ) {}
 
   async findAll(): Promise<User[]> | never {
-    const users = await this.userRepo.find();
-    if (users.length < 1) {
+    const users = await this.usersRepository.find();
+    if (!users) {
       throw new HttpException('No Content', HttpStatus.NO_CONTENT);
     }
 
@@ -33,9 +35,9 @@ export class UsersService {
       );
     }
 
-    const newUser = this.userRepo.create(payload);
+    const newUser = this.usersRepository.create(payload);
     newUser.password = await bcrypt.hash(password, 10);
-    return await this.userRepo.save(newUser);
+    return await this.usersRepository.save(newUser);
   }
 
   async update(id: number, payload: UpdateUserDto): Promise<User> | never {
@@ -47,17 +49,17 @@ export class UsersService {
       payload.password = await bcrypt.hash(payload.password, 10);
     }
 
-    this.userRepo.merge(userToUpdate, payload);
-    return await this.userRepo.save(userToUpdate);
+    this.usersRepository.merge(userToUpdate, payload);
+    return await this.usersRepository.save(userToUpdate);
   }
 
   async findUserByEmail(email: string): Promise<boolean | User> {
-    const user = await this.userRepo.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({ where: { email } });
     return user ? user : false;
   }
 
   async findUser(id: number): Promise<User> | never {
-    const user = await this.userRepo.findOne(id);
+    const user = await this.usersRepository.findOne(id);
     if (!user)
       throw new NotFoundException("The user to research doesn't exist");
     return user;
@@ -67,7 +69,7 @@ export class UsersService {
     const user = await this.findUser(id);
     if (!user) throw new NotFoundException("The user to delete doesn't exist");
 
-    await this.userRepo.delete(user.id);
+    await this.usersRepository.delete(user.id);
     return {
       response: `User #${user.id} was deleted`,
       status: HttpStatus.OK,
