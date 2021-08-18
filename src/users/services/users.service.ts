@@ -63,7 +63,7 @@ export class UsersService {
   }
 
   async findUser(id: number): Promise<User> | never {
-    const user = await this.userRepo.findOne(id);
+    const user = await this.usersRepository.findOne(id);
     if (!user) throw new NotFoundException(`User #${id} doesn't exist`);
     return user;
   }

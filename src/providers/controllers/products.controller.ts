@@ -26,6 +26,7 @@ import {
 import { ProductsService } from '../services/products.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { Public } from '../../auth/decorators/public.decorator';
+import { AccessGuard } from '../guards/access.guard';
 
 // @UseGuards(AuthGuard('jwt'))
 @UseGuards(JwtAuthGuard)
@@ -68,6 +69,7 @@ export class ProductsController {
     return this.productsService.getProductWithProvider(id);
   }
 
+  @UseGuards(AccessGuard)
   @Public()
   @ApiOperation({ summary: 'get only a product' })
   @ApiResponse({ type: ProductNotFoundResponse, status: 404 })
