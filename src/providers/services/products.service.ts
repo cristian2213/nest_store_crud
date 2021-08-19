@@ -77,4 +77,19 @@ export class ProductsService {
       status: HttpStatus.OK,
     };
   }
+
+  async productsBulkUpload(file: Express.Multer.File) {
+    /*
+  fieldname: 'products_list',
+  originalname: 'original_file.csv',
+  encoding: '7bit',
+  mimetype: 'text/csv',
+  destination: './storage/products/csv',
+  filename: 'ba658d-original_file.csv',
+  path: 'storage\\products\\csv\\ba658d-original_file.csv',
+  size: 392
+} */
+
+    return null;
+  }
 }

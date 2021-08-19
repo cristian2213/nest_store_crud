@@ -23,7 +23,7 @@ export class Product implements SchemaProduct {
 
   @Column({
     type: 'varchar',
-    length: 150,
+    length: 255,
     nullable: false,
   })
   name: string;

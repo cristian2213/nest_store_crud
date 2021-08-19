@@ -10,6 +10,10 @@ import {
   Put,
   Delete,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  Res,
+  Inject,
 } from '@nestjs/common';
 // import { AuthGuard } from '@nestjs/passport';
 import {
@@ -18,6 +22,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 import {
   CreateProductDto,
   ProductNotFoundResponse,
@@ -26,6 +33,7 @@ import {
 import { ProductsService } from '../services/products.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { Public } from '../../auth/decorators/public.decorator';
+import { multerOptions } from 'src/utils/file-uploading.util';
 
 // @UseGuards(AuthGuard('jwt'))
 @UseGuards(JwtAuthGuard)
@@ -96,5 +104,16 @@ export class ProductsController {
   @HttpCode(HttpStatus.OK)
   deleteProduct(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.delete(id);
+  }
+
+  @Public() // FIXME Delete this custom decorator when i finished
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.CREATED)
+  @Post('bulk-upload')
+  @UseInterceptors(
+    FileInterceptor('products_list', multerOptions('./storage/products/csv')),
+  )
+  productsBulkUpload(@UploadedFile() file: Express.Multer.File) {
+    return this.productsService.productsBulkUpload(file);
   }
 }

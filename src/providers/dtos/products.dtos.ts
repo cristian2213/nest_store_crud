@@ -10,14 +10,14 @@ import { PartialType, ApiProperty } from '@nestjs/swagger';
 export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
-  @Length(1, 150)
+  @Length(1, 255)
   @ApiProperty({
     required: true,
     type: String,
     description: 'product name',
     example: 'keyboard',
     minLength: 1,
-    maxLength: 150,
+    maxLength: 255,
     nullable: false,
   })
   readonly name: string;
