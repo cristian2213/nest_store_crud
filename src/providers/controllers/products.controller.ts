@@ -12,8 +12,6 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
-  Res,
-  Inject,
 } from '@nestjs/common';
 // import { AuthGuard } from '@nestjs/passport';
 import {
@@ -114,6 +112,6 @@ export class ProductsController {
     FileInterceptor('products_list', multerOptions('./storage/products/csv')),
   )
   productsBulkUpload(@UploadedFile() file: Express.Multer.File) {
-    return this.productsService.productsBulkUpload(file);
+    return this.productsService.productsBulkUploadValidation(file);
   }
 }

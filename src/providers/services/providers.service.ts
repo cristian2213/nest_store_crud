@@ -17,9 +17,6 @@ export class ProvidersService {
 
   async findAll(): Promise<Provider[]> {
     const providers = await this.providerRepo.find();
-    if (providers.length < 1)
-      throw new HttpException('No Content', HttpStatus.NO_CONTENT);
-
     return providers;
   }
 

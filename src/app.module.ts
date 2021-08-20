@@ -10,6 +10,7 @@ import { enviroments } from './enviroments';
 import { ProviderModule } from './providers/provider.module';
 import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
+import { ErrorLogModule } from './error-log/error-log.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AuthModule } from './auth/auth.module';
     ProviderModule,
     UserModule,
     AuthModule,
+    ErrorLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

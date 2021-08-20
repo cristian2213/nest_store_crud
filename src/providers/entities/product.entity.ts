@@ -34,6 +34,12 @@ export class Product implements SchemaProduct {
   })
   price: number;
 
+  @Column({
+    type: 'integer',
+    nullable: false,
+  })
+  providerId: number;
+
   @ManyToOne(() => Provider, (provider) => provider.products)
   provider: Provider;
 
@@ -48,4 +54,10 @@ export class Product implements SchemaProduct {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+}
+
+export class ProductRow {
+  readonly name: string;
+  readonly price: number;
+  readonly providerIdentification: number;
 }

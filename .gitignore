@@ -40,3 +40,8 @@ lerna-debug.log*
 .env
 .prod.env
 .stag.env
+
+# general folders
+storage/
+resource_files/
+coverage/
