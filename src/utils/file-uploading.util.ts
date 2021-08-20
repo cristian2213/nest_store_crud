@@ -2,8 +2,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 
 export const fileFilter = (req, file, callback) => {
-  if (!file.originalname.match(/\.(csv)$/))
-    return callback(new Error("File doesn't allowed!"), false);
+  if (!file.originalname.match(/\.(csv)$/)) return callback(null, false);
   callback(null, true);
 };
 

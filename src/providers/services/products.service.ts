@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -85,7 +86,12 @@ export class ProductsService {
   }
 
   async productsBulkUploadValidation(file: Express.Multer.File) {
-    const stream = fs.createReadStream(file.path, {
+    if (!file || file === undefined)
+      throw new BadRequestException(
+        'Invalid file provided, only allowed format (.csv)',
+      );
+
+    const stream = await fs.createReadStream(file.path, {
       encoding: 'utf-8',
     });
     const entities = await this.csvParser.parse(
@@ -118,7 +124,6 @@ export class ProductsService {
       target.push({ ...item, row, errors });
     };
 
-    // FIXME modularize each field
     entities.list.forEach((row, index) => {
       try {
         const providerId = row.providerId.toString().trim();
@@ -209,25 +214,25 @@ export class ProductsService {
       await getManager().transaction(async () => {
         await this.productRepo.save(successData);
       });
+
+      this.errorLogService.createLog({
+        totalRecords: total,
+        loads: totalSuccessful,
+        erros: totalUnsuccessful,
+        errorLog: JSON.stringify(unsuccessful),
+        file_path,
+      });
+
+      return {
+        total: total,
+        successful: totalSuccessful,
+        unsuccessful: totalUnsuccessful,
+        uploadedData: successData,
+        rejectedData: unsuccessful,
+      };
     } catch (error) {
       return error;
     }
-
-    this.errorLogService.createLog({
-      totalRecords: total,
-      loads: totalSuccessful,
-      erros: totalUnsuccessful,
-      errorLog: JSON.stringify(unsuccessful),
-      file_path,
-    });
-
-    return {
-      total: total,
-      successful: totalSuccessful,
-      unsuccessful: totalUnsuccessful,
-      uploadedData: successData,
-      rejectedData: unsuccessful,
-    };
   }
 
   checkRepeatingProducts(search: string, list: Array<any>): boolean {

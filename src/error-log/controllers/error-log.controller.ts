@@ -41,7 +41,7 @@ export class ErrorLogController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'get all error log' })
+  @ApiOperation({ summary: 'get log' })
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   getOne(@Param('id', ParseIntPipe) id: number) {
@@ -50,7 +50,7 @@ export class ErrorLogController {
 
   @Public()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'get all error log' })
+  @ApiOperation({ summary: 'download error log file' })
   @Get(':id/download')
   @HttpCode(HttpStatus.OK)
   async downloadLog(

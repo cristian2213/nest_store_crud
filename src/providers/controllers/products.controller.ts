@@ -19,6 +19,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -105,6 +106,8 @@ export class ProductsController {
   }
 
   @Public() // FIXME Delete this custom decorator when i finished
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'upload product list' })
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   @Post('bulk-upload')
