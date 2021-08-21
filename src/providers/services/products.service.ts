@@ -1,11 +1,17 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getManager, Repository } from 'typeorm';
+import {
+  getManager,
+  Repository,
+  Transaction,
+  TransactionManager,
+} from 'typeorm';
 import * as fs from 'fs';
 import { CsvParser } from 'nest-csv-parser';
 import {
@@ -15,8 +21,14 @@ import {
 } from '../dtos/products.dtos';
 import { Product, ProductRow } from '../entities/product.entity';
 import { ProvidersService } from './providers.service';
-import { errorMessages } from 'src/utils/products-bulk-upload-msgs.util';
+import { erroMsgs } from 'src/utils/products-bulk-upload-msgs.util';
 import { ErrorLogService } from 'src/error-log/services/error-log.service';
+import {
+  positiveNumberValidation,
+  searchItem,
+  validatePrice,
+  validateString,
+} from 'src/utils/fields-validation.util';
 
 @Injectable()
 export class ProductsService {
@@ -85,9 +97,12 @@ export class ProductsService {
   }
 
   async productsBulkUploadValidation(file: Express.Multer.File) {
-    const stream = fs.createReadStream(file.path, {
-      encoding: 'utf-8',
-    });
+    if (!file || file === undefined)
+      throw new BadRequestException(
+        'Invalid file provided, only allowed format (.csv)',
+      );
+
+    const stream = await fs.createReadStream(file.path, { encoding: 'utf-8' });
     const entities = await this.csvParser.parse(
       stream,
       ProductRow,
@@ -106,9 +121,9 @@ export class ProductsService {
       throw new HttpException('Document No Content!', HttpStatus.BAD_REQUEST);
 
     const providers = await this.providersService.findAll();
-    const successData = [];
-    const invalidDataLog = [];
     const total = entities.list.length;
+    const products = [];
+    const errorLog = [];
     const pushError = (
       target: any,
       item: any,
@@ -118,119 +133,65 @@ export class ProductsService {
       target.push({ ...item, row, errors });
     };
 
-    // FIXME modularize each field
-    entities.list.forEach((row, index) => {
+    entities.list.forEach(async (prod, index: number) => {
+      const row = index + 2;
       try {
-        const providerId = row.providerId.toString().trim();
-        if (providerId.length > 0) {
-          const checkProvider = providers.some(
-            (prov) => prov.id === parseInt(providerId),
-          );
-          if (!checkProvider) {
-            pushError(invalidDataLog, row, index + 2, [
-              errorMessages.providerId.notFound,
-            ]);
-            return;
-          }
-          // check price
-          const priceToStr = row.price.toString().trim();
-          if (priceToStr.length > 0) {
-            const regexPrice = /^(\d*([.,](?=\d{3}))?\d+)+((?!\2)[.,]\d\d)?$/;
-            if (regexPrice.test(priceToStr)) {
-              const productPrice = parseInt(priceToStr.replace(/[,. ]/g, ''));
-              if (productPrice === 0) {
-                pushError(invalidDataLog, row, index + 2, [
-                  errorMessages.price.cero,
-                ]);
-                return;
-              }
-
-              // check name
-              const productName = row.name.toString().trim();
-              if (productName.length === 0 || productName.length > 255) {
-                pushError(invalidDataLog, row, index + 2, [
-                  errorMessages.name.void,
-                ]);
-                return;
-              }
-              // check repeated product
-              if (this.checkRepeatingProducts(productName, successData)) {
-                pushError(invalidDataLog, row, index + 2, [
-                  errorMessages.global.repeated,
-                ]);
-                return;
-              }
-              successData.push({
-                name: productName,
-                price: productPrice,
-                providerId: providerId,
-              });
-              return;
-            }
-            pushError(invalidDataLog, row, index + 2, [
-              errorMessages.price.void,
-            ]);
-            return;
-          }
-          pushError(invalidDataLog, row, index + 2, [
-            errorMessages.price.empty,
+        // check providerId
+        const providerId = positiveNumberValidation(prod.providerId);
+        if (!providerId)
+          return pushError(errorLog, prod, row, [
+            erroMsgs.providerId.notPositive,
           ]);
-          return;
-        }
-        pushError(invalidDataLog, row, index + 2, [
-          errorMessages.providerId.empty,
-        ]);
+        if (!searchItem(providerId, providers))
+          return pushError(errorLog, prod, row, [erroMsgs.providerId.notFound]);
+
+        // check price
+        const price = validatePrice(prod.price);
+        if (price === null)
+          return pushError(errorLog, prod, row, [erroMsgs.price.void]);
+        if (price === false)
+          return pushError(errorLog, prod, row, [erroMsgs.price.cero]);
+
+        // check name
+        const name = validateString(prod.name);
+        if (name === null)
+          return pushError(errorLog, prod, row, [erroMsgs.name.num]);
+        const nameLength = name.length;
+        if (nameLength === 0)
+          return pushError(errorLog, prod, row, [erroMsgs.name.empty]);
+        if (nameLength > 255)
+          return pushError(errorLog, prod, row, [erroMsgs.name.limit]);
+
+        // repeated
+        if (searchItem(name, providers))
+          return pushError(errorLog, prod, row, [erroMsgs.global.repeated]);
+        return products.push({ name, price, providerId });
       } catch (error) {
-        pushError(invalidDataLog, row, index + 2, [error.message]);
+        pushError(errorLog, prod, row, [error.message.substring(0, 150)]);
       }
     });
 
-    const response = await this.insertProductsBulkUpload(
-      successData,
-      invalidDataLog,
-      total,
-      file.path,
-    );
-
-    return response instanceof Error
-      ? errorMessages.bulkUploadMsg(response)
-      : response;
+    const errors = errorLog.length;
+    const loads = products.length;
+    await this.productsBulkUpload(products);
+    await this.errorLogService.createLog({
+      totalRecords: total,
+      loads: products.length,
+      erros: errors,
+      errorLog: JSON.stringify(errorLog),
+      file_path: file.path,
+    });
+    return { total, loads, errors, errorLog };
   }
 
-  async insertProductsBulkUpload(
-    successData: Product[],
-    unsuccessful: ProductRow[],
-    total: number,
-    file_path: string,
-  ) {
-    const totalSuccessful = successData.length;
-    const totalUnsuccessful = unsuccessful.length;
+  async productsBulkUpload(products: Product[]) {
     try {
       await getManager().transaction(async () => {
-        await this.productRepo.save(successData);
+        await this.productRepo.save(products);
       });
+      return true;
     } catch (error) {
       return error;
     }
-
-    this.errorLogService.createLog({
-      totalRecords: total,
-      loads: totalSuccessful,
-      erros: totalUnsuccessful,
-      errorLog: JSON.stringify(unsuccessful),
-      file_path,
-    });
-
-    return {
-      total: total,
-      successful: totalSuccessful,
-      unsuccessful: totalUnsuccessful,
-      uploadedData: successData,
-      rejectedData: unsuccessful,
-    };
-  }
-
-  checkRepeatingProducts(search: string, list: Array<any>): boolean {
-    return list.some((prod) => prod.name.trim() === search);
   }
 }
