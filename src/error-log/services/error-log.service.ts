@@ -43,14 +43,11 @@ export class ErrorLogService {
     }
     const content = JSON.parse(log.errorLog).map((prod) => {
       const { name, price, providerId, row, errors } = prod;
-      return `Name: ${name} \n \t Row: ${row} \n \t Price: ${price} \n \t ProviderId: ${providerId} \n \t Errors: \n \t \t ${errors.join(
+      return `Name: ${name}, Row: ${row}, Price: ${price}, ProviderId: ${providerId} \n \t Errors: ${errors.join(
         ' - ',
-      )} \n`;
+      )} \n \n`;
     });
-
-    fs.writeFileSync(filePath, content.join(''), {
-      encoding: 'utf-8',
-    });
+    fs.writeFileSync(filePath, content.join(''), { encoding: 'utf-8' });
     return res.download(filePath);
   }
 }

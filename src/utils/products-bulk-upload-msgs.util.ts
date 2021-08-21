@@ -1,15 +1,19 @@
-export const errorMessages = {
+export const erroMsgs = {
   providerId: {
     empty: 'The provider identification empty',
-    notFound: 'Impossible save, the provider does not exist into database',
+    notFound: 'The provider pasted does not exist into database',
+
+    notPositive:
+      'The provider identification is not positive type or it is cero',
   },
   price: {
-    empty: 'The product price is empty',
-    void: 'The product price is void',
+    void: 'The product price is null',
     cero: 'The product contains a price of cero (0)',
   },
   name: {
-    void: 'The product name is empty or the length of the name is greater than 255 characters',
+    num: 'The product name is numeric',
+    empty: 'The product name is empty',
+    limit: 'The product name is very long',
   },
 
   global: {
