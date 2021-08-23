@@ -105,7 +105,6 @@ export class ProductsController {
     return this.productsService.delete(id);
   }
 
-  @Public() // FIXME Delete this custom decorator when i finished
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'upload product list' })
   @ApiBearerAuth()

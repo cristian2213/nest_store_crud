@@ -4,8 +4,10 @@ import {
   IsString,
   IsNotEmpty,
   IsPositive,
+  IsArray,
 } from 'class-validator';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
+import { ErrorLog } from 'src/error-log/entities/error-log.entity';
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -86,4 +88,30 @@ export class ProductToDeleteResponse {
     example: 200,
   })
   status: number;
+}
+
+export class ProductBulkLoadResponse {
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+  })
+  total: number;
+
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+  })
+  loads: number;
+
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+  })
+  errors: number;
+
+  @IsArray()
+  @ApiProperty({
+    type: Number,
+  })
+  errorLog: ErrorLog[];
 }

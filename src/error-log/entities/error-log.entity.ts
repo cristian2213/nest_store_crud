@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import {
   Entity,
   Column,
@@ -43,6 +44,7 @@ export class ErrorLog implements SchemaErrorLog {
   })
   erros: number;
 
+  @Exclude()
   @Column({
     type: 'text',
     name: 'errorLog',

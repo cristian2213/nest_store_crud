@@ -48,7 +48,6 @@ export class ErrorLogController {
     return this.errorLogService.getOne(id);
   }
 
-  @Public()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'download error log file' })
   @Get(':id/download')

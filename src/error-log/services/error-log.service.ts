@@ -28,7 +28,7 @@ export class ErrorLogService {
     return await this.errorLogRepository.save(newLog);
   }
 
-  async downloadLog(id: number, res) {
+  async downloadLog(id: number, res): Promise<File> {
     const log: ErrorLog = await this.getOne(id);
     if (!log) throw new NotFoundException(`Log #${id} doesn't exist`);
 

@@ -16,6 +16,7 @@ import * as fs from 'fs';
 import { CsvParser } from 'nest-csv-parser';
 import {
   CreateProductDto,
+  ProductBulkLoadResponse,
   ProductToDeleteResponse,
   UpdateProductDto,
 } from '../dtos/products.dtos';
@@ -96,7 +97,9 @@ export class ProductsService {
     };
   }
 
-  async productsBulkUploadValidation(file: Express.Multer.File) {
+  async productsBulkUploadValidation(
+    file: Express.Multer.File,
+  ): Promise<ProductBulkLoadResponse> {
     if (!file || file === undefined)
       throw new BadRequestException(
         'Invalid file provided, only allowed format (.csv)',
@@ -184,7 +187,7 @@ export class ProductsService {
     return { total, loads, errors, errorLog };
   }
 
-  async productsBulkUpload(products: Product[]) {
+  async productsBulkUpload(products: Product[]): Promise<boolean | never> {
     try {
       await getManager().transaction(async () => {
         await this.productRepo.save(products);
