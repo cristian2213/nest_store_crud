@@ -45,3 +45,4 @@ lerna-debug.log*
 storage/
 resource_files/
 coverage/
+diagrams/

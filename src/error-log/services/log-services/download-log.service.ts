@@ -1,35 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import * as fs from 'fs';
-import { ErrorLog } from '../entities/error-log.entity';
-import { CreateErrorLog } from '../dtos/error-log.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { ErrorLogRepository } from 'src/error-log/repositories/error-log-repository';
+import { ErrorLog } from 'src/error-log/entities/error-log.entity';
+import { FindLogService } from './find-log.service';
 
 @Injectable()
-export class ErrorLogService {
+export class DownloadLogService extends ErrorLogRepository {
   constructor(
-    @InjectRepository(ErrorLog)
-    private errorLogRepository: Repository<ErrorLog>,
-  ) {}
-
-  async getAll(): Promise<ErrorLog[]> {
-    const errorLog: ErrorLog[] = await this.errorLogRepository.find();
-    return errorLog;
-  }
-
-  async getOne(id: number): Promise<ErrorLog> | never {
-    const log: ErrorLog = await this.errorLogRepository.findOne(id);
-    if (!log) throw new NotFoundException(`Log #${id} doesn't exist`);
-    return log;
-  }
-
-  async createLog(createErrorLog: CreateErrorLog): Promise<ErrorLog> {
-    const newLog = await this.errorLogRepository.create(createErrorLog);
-    return await this.errorLogRepository.save(newLog);
+    public errorLogRepository: Repository<ErrorLog>,
+    private findLogService: FindLogService,
+  ) {
+    super(errorLogRepository);
   }
 
   async downloadLog(id: number, res): Promise<File> {
-    const log: ErrorLog = await this.getOne(id);
+    const log: ErrorLog = await this.findLogService.findLog(id);
     if (!log) throw new NotFoundException(`Log #${id} doesn't exist`);
 
     const path = 'storage\\products\\error-log\\';

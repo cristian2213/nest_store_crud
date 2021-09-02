@@ -19,27 +19,41 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiConsumes,
 } from '@nestjs/swagger';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-
 import {
   CreateProductDto,
   ProductNotFoundResponse,
   UpdateProductDto,
 } from '../dtos/products.dtos';
-import { ProductsService } from '../services/products.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { Public } from '../../auth/decorators/public.decorator';
 import { multerOptions } from 'src/utils/file-uploading.util';
+import { FindProductsService } from '../services/products-services/find-products.service';
+import { FindProductService } from '../services/products-services/find-product.service';
+import { CreateProductService } from '../services/products-services/create-product.service';
+import { UpdateProductService } from '../services/products-services/update-product.service';
+import { DeleteProductService } from '../services/products-services/delete-product.service';
+import { GetProductsWithProvider } from '../services/products-services/get-products-with-provider.service';
+import { GetProductWithProvider } from '../services/products-services/get-product-with-provider.service';
+import { ProductsBulkUpload } from '../services/products-services/products-bulk-upload.service';
 
 // @UseGuards(AuthGuard('jwt'))
 @UseGuards(JwtAuthGuard)
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
-  constructor(private productsService: ProductsService) {}
+  constructor(
+    private findProductsService: FindProductsService,
+    private findProductService: FindProductService,
+    private createProductService: CreateProductService,
+    private updateProductService: UpdateProductService,
+    private deleteProductService: DeleteProductService,
+    private getProductsWithProviderAtr: GetProductsWithProvider,
+    private getProductWithProviderAtr: GetProductWithProvider,
+    private productsBulkUploadAtr: ProductsBulkUpload,
+  ) {}
 
   @Public()
   @ApiOperation({ summary: 'get all products' })
@@ -47,14 +61,14 @@ export class ProductsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   getProducts() {
-    return this.productsService.findAll();
+    return this.findProductsService.findProducts();
   }
 
   @ApiOperation({ summary: 'create a product' })
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  createProduct(@Body() createProductDto: CreateProductDto) {
+    return this.createProductService.createProduct(createProductDto);
   }
 
   @ApiBearerAuth()
@@ -63,7 +77,7 @@ export class ProductsController {
   @Get('provider')
   @HttpCode(HttpStatus.OK)
   getProductsWithProvider() {
-    return this.productsService.getProductsWithProvider();
+    return this.getProductsWithProviderAtr.getProductsWithProvider();
   }
 
   @ApiBearerAuth()
@@ -72,7 +86,7 @@ export class ProductsController {
   @Get(':id/provider')
   @HttpCode(HttpStatus.OK)
   getProductWithProvider(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.getProductWithProvider(id);
+    return this.getProductWithProviderAtr.getProductWithProvider(id);
   }
 
   @Public()
@@ -81,7 +95,7 @@ export class ProductsController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   getProduct(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.find(id);
+    return this.findProductService.findProduct(id);
   }
 
   @ApiBearerAuth()
@@ -89,11 +103,11 @@ export class ProductsController {
   @ApiResponse({ type: ProductNotFoundResponse, status: 404 })
   @Put(':id')
   @HttpCode(HttpStatus.ACCEPTED)
-  update(
+  updateProduct(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateProductDto,
   ) {
-    return this.productsService.update(id, payload);
+    return this.updateProductService.updateProduct(id, payload);
   }
 
   @ApiBearerAuth()
@@ -102,10 +116,9 @@ export class ProductsController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   deleteProduct(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.delete(id);
+    return this.deleteProductService.deleteProduct(id);
   }
 
-  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'upload product list' })
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
@@ -114,6 +127,6 @@ export class ProductsController {
     FileInterceptor('products_list', multerOptions('./storage/products/csv')),
   )
   productsBulkUpload(@UploadedFile() file: Express.Multer.File) {
-    return this.productsService.productsBulkUploadValidation(file);
+    return this.productsBulkUploadAtr.productsBulkUpload(file);
   }
 }

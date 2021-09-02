@@ -18,6 +18,7 @@ export class JWTStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   validate(payload: PayloadToken) {
+    console.log('1.', payload);
     return payload;
   }
 }

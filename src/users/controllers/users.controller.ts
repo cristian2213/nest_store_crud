@@ -18,7 +18,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { UsersService } from '../services/users.service';
 import {
   CreateUserDto,
   UpdateUserDto,
@@ -27,12 +26,23 @@ import {
 } from '../dtos/users.dtos';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { DeleteUserService } from '../services/users-services/delete-user.service';
+import { CreateUserService } from '../services/users-services/create-user.service';
+import { FindUserService } from '../services/users-services/find-user.service';
+import { UpdateUserService } from '../services/users-services/update-user.service';
+import { FindUsersService } from '../services/users-services/find-users.service';
 
 @ApiTags('users')
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(
+    private findUsersService: FindUsersService,
+    private findUserService: FindUserService,
+    private createUserService: CreateUserService,
+    private updateUserService: UpdateUserService,
+    private deleteUserService: DeleteUserService,
+  ) {}
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'get all users' })
@@ -40,7 +50,7 @@ export class UsersController {
   @Get()
   @HttpCode(HttpStatus.ACCEPTED)
   getUsers() {
-    return this.userService.findAll();
+    return this.findUsersService.findUsers();
   }
 
   @ApiBearerAuth()
@@ -49,7 +59,7 @@ export class UsersController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   getUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findUser(id);
+    return this.findUserService.findUser(id);
   }
 
   @Public()
@@ -61,7 +71,7 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.OK)
   createUser(@Body() payload: CreateUserDto) {
-    return this.userService.create(payload);
+    return this.createUserService.createUser(payload);
   }
 
   @ApiBearerAuth()
@@ -73,7 +83,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateUserDto,
   ) {
-    return this.userService.update(id, payload);
+    return this.updateUserService.updateUser(id, payload);
   }
 
   @ApiBearerAuth()
@@ -82,6 +92,6 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(HttpStatus.ACCEPTED)
   deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.delete(id);
+    return this.deleteUserService.deleteUser(id);
   }
 }
