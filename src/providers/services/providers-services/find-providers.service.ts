@@ -10,7 +10,6 @@ export class FindProvidersService extends ProviderRepository {
   }
 
   async findProviders(): Promise<Provider[]> {
-    const providers = await this.providerRepository.find();
-    return providers;
+    return this.providerRepository.find();
   }
 }

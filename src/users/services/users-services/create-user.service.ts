@@ -27,6 +27,6 @@ export class CreateUserService extends UserRepository {
 
     const newUser = this.usersRepository.create(payload);
     newUser.password = await bcrypt.hash(password, 10);
-    return await this.usersRepository.save(newUser);
+    return this.usersRepository.save(newUser);
   }
 }

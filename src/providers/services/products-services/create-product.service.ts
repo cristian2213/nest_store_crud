@@ -11,7 +11,9 @@ export class CreateProductService extends ProductReposity {
   }
 
   async createProduct(payload: CreateProductDto): Promise<Product> {
-    const newProduct = await this.productsRepository.create(payload);
-    return await this.productsRepository.save(newProduct);
+    const newProduct = await Promise.resolve(
+      this.productsRepository.create(payload),
+    );
+    return this.productsRepository.save(newProduct);
   }
 }

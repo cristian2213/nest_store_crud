@@ -21,6 +21,6 @@ export class UpdateProviderService extends ProviderRepository {
     const provide = await this.findProviderService.findProvider(id);
     if (!provide) throw new NotFoundException(`Provider #${id} doesn't exist`);
     this.providerRepository.merge(provide, payload);
-    return await this.providerRepository.save(provide);
+    return this.providerRepository.save(provide);
   }
 }

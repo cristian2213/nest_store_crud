@@ -10,7 +10,6 @@ export class FindLogsService extends ErrorLogRepository {
   }
 
   async findLogs(): Promise<ErrorLog[]> {
-    const errorLog: ErrorLog[] = await this.errorLogRepository.find();
-    return errorLog;
+    return this.errorLogRepository.find();
   }
 }

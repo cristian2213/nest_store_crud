@@ -25,6 +25,6 @@ export class UpdateUserService extends UserRepository {
     }
 
     this.usersRepository.merge(userToUpdate, payload);
-    return await this.usersRepository.save(userToUpdate);
+    return this.usersRepository.save(userToUpdate);
   }
 }

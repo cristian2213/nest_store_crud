@@ -10,7 +10,6 @@ export class FindProductsService extends ProductReposity {
   }
 
   async findProducts(): Promise<Product[]> | never {
-    const products = await this.productsRepository.find();
-    return products;
+    return this.productsRepository.find();
   }
 }

@@ -21,7 +21,7 @@ export class ReadingCSVFile {
         'Invalid file provided, only allowed format (.csv)',
       );
 
-    const stream = await fs.createReadStream(file.path, { encoding: 'utf-8' });
+    const stream = fs.createReadStream(file.path, { encoding: 'utf-8' });
     const entities = await this.csvParser.parse(
       stream,
       ProductRow,

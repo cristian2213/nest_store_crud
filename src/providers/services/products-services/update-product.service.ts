@@ -24,6 +24,6 @@ export class UpdateProductService extends ProductReposity {
       throw new NotFoundException(`Product #${id} doesn't exist`);
 
     this.productsRepository.merge(product, payload);
-    return await this.productsRepository.save(product);
+    return this.productsRepository.save(product);
   }
 }

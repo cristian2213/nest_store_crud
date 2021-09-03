@@ -10,9 +10,8 @@ export class GetProductsWithProvider extends ProductReposity {
   }
 
   async getProductsWithProvider(): Promise<Product[]> | never {
-    const products = await this.productsRepository.find({
+    return this.productsRepository.find({
       relations: ['provider'],
     });
-    return products;
   }
 }

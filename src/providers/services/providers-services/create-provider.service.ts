@@ -12,7 +12,6 @@ export class CreateProviderService extends ProviderRepository {
 
   async createProvider(payload: CreateProviderDto): Promise<Provider> {
     const provider = this.providerRepository.create(payload);
-    const providerCreated = await this.providerRepository.save(provider);
-    return providerCreated;
+    return this.providerRepository.save(provider);
   }
 }

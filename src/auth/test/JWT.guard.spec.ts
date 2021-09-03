@@ -2,7 +2,6 @@ import { Reflector } from '@nestjs/core';
 import { createMock } from '@golevelup/nestjs-testing';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ExecutionContext } from '@nestjs/common';
-import { IS_PUBLIC_KEY, Public } from '../decorators/public.decorator';
 
 describe('JwtAuthGuard', () => {
   let guard: JwtAuthGuard;
@@ -49,7 +48,7 @@ describe('JwtAuthGuard', () => {
 
       test('then it should allow authentication with public Middleware', async () => {
         const context = createMock<ExecutionContext>();
-        context.getHandler.mockReturnValue(() => true); // FIXME
+        context.getHandler.mockReturnValue(() => true);
         try {
           expect(await guard.canActivate(context)).toBe(true);
         } catch (error) {}

@@ -12,6 +12,6 @@ export class CreateLogService extends ErrorLogRepository {
 
   async createLog(createErrorLog: CreateErrorLog): Promise<ErrorLog> {
     const newLog = await this.errorLogRepository.create(createErrorLog);
-    return await this.errorLogRepository.save(newLog);
+    return this.errorLogRepository.save(newLog);
   }
 }

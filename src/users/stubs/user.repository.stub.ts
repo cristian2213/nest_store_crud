@@ -8,8 +8,7 @@ export let state = {
 };
 
 export const mutationState = (key: string, value: boolean) => {
-  const result = (state[key] = value);
-  return result;
+  return (state[key] = value);
 };
 
 export const usersStub = (): User[] => {
